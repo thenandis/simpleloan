@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!--
+	!-- Latest compiled and minified CSS --
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+	!-- jQuery library --
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jQuery.min.js"></script>
+
+	!-- Latest compiled Javascript --
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+-->
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+	<style type="text/css">
+		body {
+		  position: relative;
+		  height: auto;
+		  min-height: 100% !important;
+		}
+
+
+		* {
+		  box-sizing: border-box;
+		}
+
+		/* Create two unequal columns that floats next to each other */
+		.column {
+		  float: left;
+		  padding: 10px;
+		  height: 300px; /* Should be removed. Only for demonstration */
+		}
+
+		.left {
+		  width: 50%;
+		  padding-left: 10px;
+		}
+
+		.right {
+		  width: 50%;
+		  padding-left: 10px;
+		}
+
+		/* Clear floats after the columns */
+		.row:after {
+		  content: "";
+		  display: table;
+		  clear: both;
+		  overflow: scroll
+		}	
+		div.au {
+			overflow: auto;
+			height: auto;
+		}
+	</style>
+
+	<title>Simple Loan Calculator</title>
+
+</head>
+
+<body>
+<div class="container row" style="background-color:#aab; justify-content: center;">
+
+	<h2 style="text-align: center">Simple Loan Calculator</h3>
+</div>			
+<div class="container row">
+		<div class="column left au" style="background-color:#abc;">
+			<div>
+				<h4>Enter Amount Borrowed</h4>
+				<input type="number" id="loanAmount"/>
+				<input type="button" value="Calculate" id="btnCalc"/>
+				<h4>Check at years</h4>
+				<input type="number" id="checkAtYears"/>
+			</div>
+			<div>
+				<h4>Interest Rate</h4>
+				<input type="number" id="intRate"/>
+				<h4>APR</h4>
+				<input type="number" id="APR"/>
+				<h4>Term</h4>
+				<input type="number" id="termYears"/>
+			</div>
+		</div>
+		<div class="column right" style="background-color:#bcd;">
+			<div>
+				<h4>Enter Amount Borrowed Old</h4>
+				<input type="number" id="loanAmountOld"/>
+				
+				<h4>Interest Rate Old</h4>
+				<input type="number" id="intRateOld"/>
+				<h4>APR Old</h4>
+				<input type="number" id="APROld"/>
+				<h4>Term Old</h4>
+				<input type="number" id="termYearsOld"/>
+			</div>
+			
+		</div>
+
+</div>	
+<div class="container row">
+		<div class="column left au" style="background-color:#ccc;">
+			<div><h4>After 5 years</h4></div>
+			<div id="fiveyeararm" class="container"></div>
+		</div>
+		<div class="column right au" style="background-color:#ffe;">
+			<div><h4>After 5 years 1% increase</h4></div>
+			<div id="onepercent" class="container"></div>
+		</div>
+</div>
+<div class="container row">
+		<div class="column left au" style="background-color:#ccc;">
+			<div><h4>After 5 years 2% increase</h4></div>
+			<div id="twopercent" class="container"></div>
+		</div>
+</div>
+
+</body>
+</html>
+
+<script>
+	var txt="";
+	var totPrincipalPaid = 0.00;
+
+	$(document).ready(function(){
+		//alert('hi');
+		$("#loanAmount").val('265000');
+		$("#intRate").val('0.02625');
+		$("#APR").val('0.0277');
+		$("#termYears").val('15');
+
+		$("#checkAtYears").val('5');
+
+		$("#loanAmountOld").val('265000');
+		$("#intRateOld").val('0.03875');
+		$("#APROld").val('0.03875');
+		$("#termYearsOld").val('25');
+	
+
+	$("#btnCalc").click(function(e){
+		//alert('hi');
+		//e.preventDefault();
+		var lnAmt = parseFloat($("#loanAmount").val());
+		var intRate = parseFloat($("#intRate").val());
+		var APR = parseFloat($("#APR").val());
+		var termMonths = parseFloat($("#termYears").val()) * 12.00;
+		var checkAtMonths = parseFloat($("#checkAtYears").val()) * 12.00;
+
+		var amtPerMonth = payPerMonth(lnAmt, intRate, termMonths);
+		var originalAmtPerMonth = amtPerMonth;
+		var amtPerMonthAPR = payPerMonth(lnAmt, APR, termMonths);
+		var loanFee = (amtPerMonthAPR - amtPerMonth) * termMonths;
+
+		txt = " Per month amt = " + amtPerMonth + " Loan Fee = " + parseFloat(loanFee).toFixed(2);
+		//$("#fiveyeararm").val(txt);
+		//$('<p>' + txt + '</p>').appendTo('#fiveyeararm');
+
+		totPrincipalPaid = 0.00;
+
+		$("#fiveyeararm").empty(); //('<p>' + ' ----  ************ ---- ' + '</p>');
+		$('<p>' + ' ---- Compare with old and new' + '</p>').appendTo('#fiveyeararm');
+
+		var netAmt = fiveyeararm(lnAmt, amtPerMonth, intRate, termMonths, checkAtMonths);
+
+
+	//------------- old data
+		
+		var lnAmtOld = parseFloat($("#loanAmountOld").val());
+		var intRateOld = parseFloat($("#intRateOld").val());
+		var APROld = parseFloat($("#APROld").val());
+		var termMonthsOld = parseFloat($("#termYearsOld").val()) * 12.00;
+
+		var amtPerMonthOld = payPerMonth(lnAmtOld, intRateOld, termMonthsOld);
+		var originalAmtPerMonthOld = amtPerMonthOld;
+		var amtPerMonthAPROld = payPerMonth(lnAmtOld, APROld, termMonthsOld);
+		var loanFeeOld = (amtPerMonthAPROld - amtPerMonthOld) * termMonthsOld;
+
+		txt = " Per month amt = " + amtPerMonthOld + " Loan Fee = " + parseFloat(loanFeeOld).toFixed(2);
+		
+		$('<p>' + ' ---- old data' + '</p>').appendTo('#fiveyeararm');
+
+
+		var netAmtOld = fiveyeararm(lnAmtOld, amtPerMonthOld, intRateOld, termMonthsOld, checkAtMonths);
+
+
+	//------------- end old data 
+
+		txt = "";
+		var intRatePlusOne = 0.0;
+		intRatePlusOne = intRate + .01;
+		amtPerMonth = payPerMonth(netAmt, intRatePlusOne, 300);
+		txt = txt + " Per month amt = " + amtPerMonth;
+
+
+		var loanAmountNeeded = loanAmtForPerMonthPmt(originalAmtPerMonth, intRatePlusOne, 300);
+
+
+		//alert(txt);		
+		var extraPrincipal = lnAmt - loanAmountNeeded - totPrincipalPaid;
+		var extraPrincipalForFiveYears = fixit(extraPrincipal / 60);
+
+		txt = txt + " </br> Extra per month payment to counter increased rate = <font color=red>" + extraPrincipalForFiveYears + "</font> </br> to bring down loan to " + loanAmountNeeded;
+
+		//alert(txt);		
+
+		//$("#onepercent").val(txt);
+		
+		$("#onepercent").empty(); //('<p>' + ' ----  ************ ---- ' + '</p>');
+		$('<p>' + ' ---- one percenters ' + '</p>').appendTo('#onepercent');
+
+		$('<p>' + txt + '</p>').appendTo('#onepercent');
+
+		txt = "";
+
+		intRatePlusOne += 0.01;
+		amtPerMonth = payPerMonth(netAmt, intRatePlusOne, 300);
+		txt = txt + " Per month amt = " + amtPerMonth;
+
+		loanAmountNeeded = loanAmtForPerMonthPmt(originalAmtPerMonth, intRatePlusOne, 300);
+		extraPrincipal = lnAmt - loanAmountNeeded - totPrincipalPaid;
+		extraPrincipalForFiveYears = fixit(extraPrincipal / 60);
+
+		txt = txt + " </br> Extra per month payment to counter increased rate = <font color=red>" + extraPrincipalForFiveYears + "</font> </br> to bring down loan to " + loanAmountNeeded;
+		//$("#onepercent").val(txt);
+		$('<p>' + txt + '</p>').appendTo('#twopercent');
+
+	});
+	});
+
+	function fiveyeararm(lnAmt, amtPerMonth, apr, termMonths, checkAtMonths) {
+		var netAmt = lnAmt;
+		var months = termMonths;
+		var intpermonth = 0.0;
+		var totInt = 0.0;
+		var principal = 0.0;
+
+		intpermonth = netAmt * apr / 12;
+		principal = amtPerMonth - intpermonth;
+		txt += " </br> First Principal = " + fixit(principal) + ", First Interest = " + fixit(intpermonth);
+			
+		for (var i = 0; i < months; i++) {
+			intpermonth = netAmt * apr / 12;
+			principal = amtPerMonth - intpermonth;
+			netAmt -= principal;
+			totInt += intpermonth;
+			if (i == checkAtMonths - 1){
+				txt += " </br> <b><p style='color:red'>Total Interest after " + Math.round(checkAtMonths) + " months = " + fixit(totInt) + ", </br> Balance = " + fixit(netAmt) + ", </br> Total principal paid = " + fixit(lnAmt - netAmt) + "</p></b>";		
+			}
+		}
+		netAmt = fixit(netAmt);
+		totInt = fixit(totInt);
+		totPrincipalPaid = lnAmt - netAmt;
+		//totPrincipalPaid = amtPerMonth - intpermonth;
+		
+		txt += " </br> Total Interest = " + totInt + ", </br> Balance = " + netAmt + ", </br> Total principal paid = " + fixit(totPrincipalPaid);
+		//$("#fiveyeararm").val(txt);
+		$('<p>' + txt + '</p>').appendTo('#fiveyeararm');
+
+		return netAmt;
+
+	}
+
+	function payPerMonth(lnAmt, intRate, monthsToGo) {
+		var perMonthAmt = 0.00;
+		var i = intRate / 12.0;
+		var base = 1.0 + i;
+		var mathPow = Math.pow(base, monthsToGo);
+		var discountFactor = (mathPow - 1.0) / (i * mathPow);
+		perMonthAmt = lnAmt / discountFactor;
+
+		return fixit(perMonthAmt);
+
+	}
+
+	function loanAmtForPerMonthPmt(perMonthAmt, intRate, monthsToGo) {
+		var lnAmt = 0.00;
+		var i = intRate / 12.0;
+		var base = 1.0 + i;
+		var mathPow = Math.pow(base, monthsToGo);
+		var discountFactor = (mathPow - 1.0) / (i * mathPow);
+		lnAmt = perMonthAmt * discountFactor;
+
+		return fixit(lnAmt);
+ 
+	}
+
+	function fixit(amt) {
+		return parseFloat(amt).toFixed(2);
+	}
+
+</script>
+
+
+
